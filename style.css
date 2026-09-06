@@ -1,0 +1,56 @@
+/**
+ * Stylesheet for the shorturl plugin
+ *
+ * Layout of the automatically displayed short url link
+ * (see "auto_display" and "auto_display_position" configuration
+ * options). The link is placed inside the content area of the used
+ * template (e.g. inside the "panel panel-default" of bootstrap
+ * based templates), either above the page title ("top") or below
+ * the page content ("bottom").
+ */
+
+/* base layout: link below the page content */
+.plugin-shorturl {
+    clear: both;
+    margin-top: 1em;
+    padding: .4em 0 0;
+    border-top: 1px solid #eee;
+    font-size: 90%;
+    color: #999;
+}
+
+.plugin-shorturl a {
+    color: #666;
+    text-decoration: none;
+    border-bottom: 1px dotted #ccc;
+}
+
+.plugin-shorturl a:hover,
+.plugin-shorturl a:focus {
+    color: #333;
+    border-bottom-style: solid;
+}
+
+/* variant "top": small button above the page title, floated right */
+.plugin-shorturl.plugin-shorturl--top {
+    float: right;
+    clear: none;
+    margin: 0 0 .3em .8em;
+    padding: 0;
+    border-top: 0;
+    font-size: 85%;
+}
+
+.plugin-shorturl--top a {
+    display: inline-block;
+    padding: .1em .7em;
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: .25em;
+}
+
+.plugin-shorturl--top a:hover,
+.plugin-shorturl--top a:focus {
+    background: #ececec;
+    border-color: #adadad;
+}
