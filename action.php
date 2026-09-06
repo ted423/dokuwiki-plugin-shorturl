@@ -10,21 +10,24 @@
  */
 class action_plugin_shorturl extends DokuWiki_Action_Plugin
 {
-
     /**
      * register the eventhandlers
      * @inheritdoc
      */
     public function register(Doku_Event_Handler $controller)
     {
-        $controller->register_hook('DOKUWIKI_STARTED',
+        $controller->register_hook(
+            'DOKUWIKI_STARTED',
             'AFTER',
             $this,
-            'handle_start');
+            'handle_start'
+        );
     }
 
     /**
      * handle event
+     *
+     * @param Doku_Event $event
      */
     public function handle_start(Doku_Event $event)
     {
@@ -32,7 +35,9 @@ class action_plugin_shorturl extends DokuWiki_Action_Plugin
         global $ACT;
         global $INPUT;
 
-        if ($ACT !== 'show') return;
+        if ($ACT !== 'show') {
+            return;
+        }
 
         $redirects = confToHash($this->getsavedir() . '/shorturl.conf');
         if (isset($redirects[$ID])) {
@@ -44,28 +49,32 @@ class action_plugin_shorturl extends DokuWiki_Action_Plugin
                 }
                 send_redirect(wl($redirects[$ID], '', true, '&'));
             }
+            // send_redirect already exits, but keep for safety
             exit;
         }
 
         if ($INPUT->get->str('generateShortURL') !== '' && auth_quickaclcheck($ID) >= AUTH_READ) {
             /** @var helper_plugin_shorturl $shorturl */
             $shorturl = plugin_load('helper', 'shorturl');
-            $shorturl->autoGenerateShortUrl($ID);
+            if ($shorturl) {
+                $shorturl->autoGenerateShortUrl($ID);
+            }
         }
     }
 
     /**
      * get savedir
+     *
+     * @return string
      */
     protected function getsavedir()
     {
         global $conf;
+
         if ($this->getConf('saveconftocachedir')) {
             return rtrim($conf['savedir'], '/') . '/cache';
         }
 
         return __DIR__;
     }
-
 }
-

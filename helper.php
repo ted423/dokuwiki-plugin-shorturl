@@ -6,8 +6,10 @@
  */
 class helper_plugin_shorturl extends DokuWiki_Plugin
 {
-
+    /** @var string */
     protected $configtocache = '';
+
+    /** @var string */
     protected $savedir = '';
 
     /**
@@ -32,20 +34,22 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
 
     /**
      * Introspection
+     *
+     * @return array
      */
     public function getMethods()
     {
-        $result = array();
-        $result[] = array(
-            'name' => 'autoGenerateShortUrl',
-            'desc' => 'returns the short url if exists, otherwise create the short url',
-            'return' => array('shortID' => 'string'),
-        );
-        $result[] = array(
-            'name' => 'shorturlPrintLink',
-            'desc' => 'returns a link to the short url if it exists, otherwise a link to create the short url',
-            'return' => array('html' => 'string'),
-        );
+        $result = [];
+        $result[] = [
+            'name'   => 'autoGenerateShortUrl',
+            'desc'   => 'returns the short url if exists, otherwise create the short url',
+            'return' => ['shortID' => 'string'],
+        ];
+        $result[] = [
+            'name'   => 'shorturlPrintLink',
+            'desc'   => 'returns a link to the short url if it exists, otherwise a link to create the short url',
+            'return' => ['html' => 'string'],
+        ];
         return $result;
     }
 
@@ -53,14 +57,14 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
      * returns shortID for pageID
      * creates and saves forwarding to shortID if not
      *
-     * @param  string $pageID
+     * @param string $pageID
      * @return string
      */
     public function autoGenerateShortUrl($pageID)
     {
         $redirects = confToHash($this->savedir . '/shorturl.conf');
-        if (in_array($pageID, $redirects)) {
-            $shortID = array_search($pageID, $redirects);
+        if (in_array($pageID, $redirects, true)) {
+            $shortID = array_search($pageID, $redirects, true);
         } else {
             $shortID = $this->generateShortUrl($pageID);
         }
@@ -74,25 +78,25 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
      * @param    string $pageID
      * @return   string shortid
      * @url      http://www.snippetit.com/2009/04/php-short-url-algorithm-implementation/
-     *
      */
     protected function generateShortUrl($pageID)
     {
-        $output = array();
-        $base32 = array(
+        $output = [];
+        $base32 = [
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
             'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
             'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-            'y', 'z', '0', '1', '2', '3', '4', '5'
-        );
+            'y', 'z', '0', '1', '2', '3', '4', '5',
+        ];
 
         $hex = md5($pageID);
         $hexLen = strlen($hex);
-        $subHexLen = $hexLen / 8;
+        $subHexLen = (int) ($hexLen / 8);
 
         for ($i = 0; $i < $subHexLen; $i++) {
             $subHex = substr($hex, $i * 8, 8);
-            $int = hexdec('0x' . $subHex);
+            // PHP 8 safe: hexdec no longer needs 0x prefix
+            $int = hexdec($subHex);
             $out = '';
 
             for ($j = 0; $j < 6; $j++) {
@@ -108,11 +112,15 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
         $redirects = confToHash($this->savedir . '/shorturl.conf');
         // check for duplicates in database and select alternative shorty when needed
         $shorturl = $output[0];
-        for ($j = 0; $j < 6; $j++) {
-            if ($redirects[$shorturl] && $redirects[$shorturl] !== $pageID) {
+        $count = count($output);
+        for ($j = 0; $j < $count - 1; $j++) {
+            if (!empty($redirects[$shorturl]) && $redirects[$shorturl] !== $pageID) {
                 $shorturl = $output[$j + 1];
+            } else {
+                break;
             }
         }
+
         $redirects[$shorturl] = $pageID;
         $filecontents = '';
         foreach ($redirects as $short => $long) {
@@ -121,7 +129,6 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
         io_saveFile($this->savedir . '/shorturl.conf', $filecontents);
 
         return $shorturl;
-
     }
 
     /**
@@ -133,11 +140,10 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
      */
     public function shorturlPrintLink($pageID)
     {
-
         if (file_exists($this->savedir . '/shorturl.conf')) {
             $redirects = confToHash($this->savedir . '/shorturl.conf');
         } else {
-            $redirects = array();
+            $redirects = [];
         }
 
         if (in_array($pageID, $redirects, true)) {
@@ -149,5 +155,4 @@ class helper_plugin_shorturl extends DokuWiki_Plugin
         $linktext = $this->getLang('generateshortlink');
         return '<a href="' . wl($pageID, ['generateShortURL' => 'yes'], true) . '"> ' . $linktext . '</a>';
     }
-
 }

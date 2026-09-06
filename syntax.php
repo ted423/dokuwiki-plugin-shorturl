@@ -8,7 +8,6 @@
  */
 class syntax_plugin_shorturl extends DokuWiki_Syntax_Plugin
 {
-
     /** @inheritdoc */
     public function getType()
     {
@@ -36,8 +35,7 @@ class syntax_plugin_shorturl extends DokuWiki_Syntax_Plugin
     /** @inheritdoc */
     public function handle($match, $state, $pos, Doku_Handler $handler)
     {
-        $data['todo'] = 'print';
-        return $data;
+        return ['todo' => 'print'];
     }
 
     /** @inheritdoc */
@@ -45,13 +43,18 @@ class syntax_plugin_shorturl extends DokuWiki_Syntax_Plugin
     {
         global $ID;
 
-        if ($mode !== 'xhtml') return false;
+        if ($mode !== 'xhtml') {
+            return false;
+        }
 
-        if ($data['todo'] === 'print') {
+        if (!empty($data['todo']) && $data['todo'] === 'print') {
             /** @var helper_plugin_shorturl $shorturl */
             $shorturl = plugin_load('helper', 'shorturl');
-            $shortID = $shorturl->autoGenerateShortUrl($ID);
-            $renderer->doc .= '<a href=' . wl($shortID, '', true) . ' class="shortlinkinpage" >' . $this->getLang('shortlinktext') . "</a>\n";
+            if ($shorturl) {
+                $shortID = $shorturl->autoGenerateShortUrl($ID);
+                $renderer->doc .= '<a href="' . wl($shortID, '', true) . '" class="shortlinkinpage">'
+                    . $this->getLang('shortlinktext') . "</a>\n";
+            }
         }
 
         return true;

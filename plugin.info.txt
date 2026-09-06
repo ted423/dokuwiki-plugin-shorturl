@@ -1,7 +1,7 @@
 base   shorturl
-author Frank Schiebel
+author Frank Schiebel; Grok FLash
 email  frank@linuxmuster.net
-date   2010-12-12
+date   2026-09-06
 name   ShortURL Plugin
-desc   Creates short urls and redirects pages based on a central redirection list. Based on Andreas Gohrs redirect plugin.
+desc   Creates short urls and redirects pages based on a central redirection list. Based on Andreas Gohrs redirect plugin. Adapted for PHP 8+.
 url    http://www.dokuwiki.org/plugin:shorturl
